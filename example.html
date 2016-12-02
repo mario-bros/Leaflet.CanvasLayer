@@ -7,10 +7,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.css" />
+  <link rel="stylesheet" href="styles.css">
   <!--[if lte IE 8]>
      <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.ie.css" />
   <![endif]-->
-  <style> 
+  <style>
     html, body, #map { height: 100%; padding: 0; margin: 0;}
   </style>
 </head>
@@ -29,14 +30,43 @@
     }).addTo(map);
 
     var BigPointLayer = L.CanvasLayer.extend({
+      //Added
+      showLabel: function (content, options) {
+			if (!this.label || this.label.options !== options) {
+				this.label = new LeafletLabel(options, this);	
+			}
+
+			//var latlng = new L.LatLng(options.y, options.x); //console.log(latlng);
+			var latlng = new L.LatLng(this.options.lat, this.options.lng);
+			
+			//latlng.lat += options.latAdjustment;
+		
+
+			//console.log(this._map);
+			this.label.setLatLng(latlng);
+			this.label.setContent(content);
+
+			this._map.showLabel(this.label);
+			//console.log(this._map);
+
+			return this;
+      },
+      //END Added
 
       renderCircle: function(ctx, point, radius) {
+
         ctx.fillStyle = 'rgba(255, 60, 60, 0.2)';
         ctx.strokeStyle = 'rgba(255, 60, 60, 0.9)';
         ctx.beginPath();
         ctx.arc(point.x, point.y, radius, 0, Math.PI * 2.0, true, true);
         ctx.closePath();
         ctx.fill();
+
+	//console.log(fill);
+	//ctx.font = "58px serif";
+	//ctx.fillText("Hello world", ctx.width/2, ctx.height/2);
+	//ctx.fillText("Hello world", 100, 100);
+
         ctx.stroke();
       },
 
@@ -48,18 +78,29 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         // get center from the map (projected)
-        var point = this._map.latLngToContainerPoint(new L.LatLng(0, 0));
+        //var point = this._map.latLngToContainerPoint(new L.LatLng(10, 10));
+        var point = this._map.latLngToContainerPoint(new L.LatLng(this.options.lat, this.options.lng));
 
         // render
-        this.renderCircle(ctx, point, (1.0 + Math.sin(Date.now()*0.001))*300);
+        //this.renderCircle(ctx, point, (1.0 + Math.sin(Date.now()*0.001))*300);
+        this.renderCircle(ctx, point, 70);
 
         this.redraw();
-
       }
     });
 
-    var layer = new BigPointLayer();
-    layer.addTo(map);
+    var option = {lat: 15, lng: 6};
+    var layer1 = new BigPointLayer(option);
+
+    var option2 = {lat: 20, lng: -8};
+    var layer2 = new BigPointLayer(option2);
+
+    //layer2.addTo(map).showLabel("Hello Work 2", { direction: 'right', noHide: false, className: "location", latAdjustment: 0, x: 6, y: 15 });
+    layer1.addTo(map).showLabel("Hello Work 1", { direction: 'right', noHide: false, className: "location"});	
+    layer2.addTo(map).showLabel("Hello Work 2", { direction: 'right', noHide: false, className: "location"});
+    
+    //layer2.addTo(map).showLabel("Hello Work 2", { direction: 'right', noHide: false, className: "location", x: 6, y: 20 });
+    
 
   </script>
 </body>
